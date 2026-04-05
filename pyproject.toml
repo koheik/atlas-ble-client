@@ -3,11 +3,11 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "atlas-client"
+name = "atlas-ble-client"
 version = "0.1.0b0"
 description = "Python BLE client for the Vakaros Atlas sailing instrument"
 requires-python = ">=3.9"
 dependencies = ["bleak>=0.21"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/atlas_client"]
+packages = ["src/atlas_ble_client"]

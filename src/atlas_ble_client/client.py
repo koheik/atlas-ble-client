@@ -110,7 +110,7 @@ Records are contiguous; use the size field to locate the next record.
 
 Usage
 -----
-    from atlas_client import AtlasClient
+    from atlas_ble_client import AtlasClient
 
     devices = await AtlasClient.find_devices(target_sn="0228006B82")
     for device in devices:

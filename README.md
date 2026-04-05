@@ -1,4 +1,4 @@
-# atlas-client
+# atlas-ble-client
 
 Python BLE client for the Vakaros Atlas sailing instrument.
 
@@ -14,14 +14,14 @@ VKX files for analysis.
 ## Installation
 
 ```bash
-pip install atlas-client
+pip install atlas-ble-client
 ```
 
 ## Usage
 
 ```python
 import asyncio
-from atlas_client import AtlasClient
+from atlas_ble_client import AtlasClient
 
 async def main():
     # Scan for all Atlas devices in range (or pass target_sn="XXXXXXXXXXXX")
@@ -45,7 +45,7 @@ asyncio.run(main())
 ### Assemble chunks into a VKX file
 
 ```python
-from atlas_client import AtlasClient
+from atlas_ble_client import AtlasClient
 
 records = []
 async for chunk_id, data in client.stream_chunks(sess):
@@ -59,7 +59,7 @@ with open("session.vkx", "wb") as f:
 
 The Atlas instrument communicates over BLE using a proprietary binary
 protocol. See the module docstring in
-[`src/atlas_client/client.py`](src/atlas_client/client.py) for the full
+[`src/atlas_ble_client/client.py`](src/atlas_ble_client/client.py) for the full
 packet format and VKX file structure.
 
 ## Disclaimer
