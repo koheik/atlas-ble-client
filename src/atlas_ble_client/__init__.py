@@ -4,6 +4,7 @@ from .client import (
     AtlasTimeoutError,
     DeviceInfo,
     SessionInfo,
+    vkx_fix_linepos,
 )
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "AtlasTimeoutError",
     "DeviceInfo",
     "SessionInfo",
+    "vkx_fix_linepos",
 ]

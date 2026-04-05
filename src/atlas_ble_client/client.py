@@ -182,6 +182,49 @@ class SessionInfo:
 
 
 # ---------------------------------------------------------------------------
+# VKX post-processing
+# ---------------------------------------------------------------------------
+
+_VKX_RECORD_SIZE: dict[int, int] = {
+    0xff: 7, 0xfe: 2, 0x01: 32, 0x02: 44, 0x03: 20, 0x04: 13,
+    0x05: 17, 0x06: 18, 0x07: 12, 0x08: 13, 0x0a: 16, 0x0b: 16,
+    0x0c: 12, 0x0e: 16, 0x0f: 16, 0x10: 12, 0x20: 13, 0x21: 52,
+}
+
+
+def vkx_fix_linepos(data: bytes) -> bytes:
+    """Convert LinePosition(0x05) lat/lon from I4 to F4 in a VKX byte string.
+
+    The Vakaros Atlas 2 stores lat/lon in LinePosition records as I4 (signed
+    32-bit integer, 1e-7 degree units). The VKX spec requires F4 (float32).
+    This function walks the VKX records and rewrites those fields in-place.
+
+    All other record types and fields are passed through unchanged.
+    """
+    result = bytearray()
+    pos = 0
+    while pos < len(data):
+        key = data[pos]
+        size = _VKX_RECORD_SIZE.get(key)
+        if size is None:
+            logger.warning("vkx_fix_linepos: unknown record key 0x%02x at offset %d", key, pos)
+            result.append(key)
+            pos += 1
+            continue
+        payload = bytearray(data[pos + 1: pos + 1 + size])
+        if key == 0x05 and len(payload) == 17:
+            # LinePosition payload: timestamp(U8) + line_end_type(U1) + lat(4) + lon(4)
+            lat_i = struct.unpack_from("<i", payload, 9)[0]
+            lon_i = struct.unpack_from("<i", payload, 13)[0]
+            struct.pack_into("<f", payload, 9,  lat_i * 1e-7)
+            struct.pack_into("<f", payload, 13, lon_i * 1e-7)
+        result.append(key)
+        result.extend(payload)
+        pos += 1 + size
+    return bytes(result)
+
+
+# ---------------------------------------------------------------------------
 # Exceptions
 # ---------------------------------------------------------------------------
 
@@ -394,3 +437,13 @@ class AtlasClient:
     @staticmethod
     def _assemble_vkx(chunks: list[tuple[int, bytes]]) -> bytes:
         return b"".join(AtlasClient._assemble_chunk(cid, b) for cid, b in chunks)
+
+    @staticmethod
+    def _assemble_vkx_compat(chunks: list[tuple[int, bytes]]) -> bytes:
+        """Assemble chunks and convert LinePosition(0x05) lat/lon from I4 to F4.
+
+        The device stores lat/lon in LinePosition records as I4 (int32, 1e-7 deg),
+        but the VKX spec requires F4 (float32). This variant produces spec-compliant
+        output by applying the conversion after assembly.
+        """
+        return vkx_fix_linepos(AtlasClient._assemble_vkx(chunks))
