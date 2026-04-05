@@ -6,6 +6,7 @@ build-backend = "hatchling.build"
 name = "atlas-ble-client"
 version = "0.1.0b0"
 description = "Python BLE client for the Vakaros Atlas sailing instrument"
+readme = "README.md"
 requires-python = ">=3.9"
 dependencies = ["bleak>=0.21"]
 
